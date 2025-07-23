@@ -1,1 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>安全驗證 | Giftomo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3a8ee2;
+            --primary-light: #5a9ef3;
+            --text: #ffffff;
+            --text-secondary: #a0aec0;
+            --bg: #1a1e1d;
+            --card-bg: rgba(27, 35, 34, 0.9);
+            --radius: 16px;
+            --transition: 0.3s;
+            --tap-target: 48px;
+            --error: #ff4444;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            color: var(--text);
+            background: linear-gradient(135deg, #1a1e2d 0%, #1e2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .bg-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.1;
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(10vw, 10vh); }
+            50% { transform: translate(5vw, 15vh); }
+            75% { transform: translate(-5vw, 5vh); }
+        }
+        
+        .auth-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo {
+            height: 50px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin: 0 0 25px 0;
+            font-weight: 600;
+            background: linear-gradient(to right, #fff, #a0d1ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.3;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 1rem;
+            transition: all var(--transition);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(58, 142, 226, 0.3);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 16px 28px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(58, 142, 226, 0.4);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .error-message {
+            color: var(--error);
+            margin-top: 15px;
+            font-size: 0.9rem;
+            height: 20px;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+        
+        .error-message.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 動態背景元素 -->
+    <div class="bg-elements" id="bgElements"></div>
+    
+    <div class="auth-card">
+        <img class="logo" src="https://raw.githubusercontent.com/gifto-mo/home.gitfmo.mo./main/logo.png" alt="Giftomo Logo">
+        <h1>安全驗證</h1>
+        
+        <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="passwordInput" placeholder="請輸入訪問密碼" autocomplete="off">
+        </div>
+        
+        <button class="btn" id="submitBtn">
+            <i class="fas fa-unlock-alt" style="margin-right: 10px;"></i> 驗證
+        </button>
+        
+        <div class="error-message" id="errorMessage"></div>
+    </div>
 
+    <script>
+        // 創建動態背景元素
+        function createBackground() {
+            const bgElements = document.getElementById('bgElements');
+            const colors = ['#3a8ee2', '#5a9ef3', '#4a6ee3'];
+            
+            for (let i = 0; i < 3; i++) {
+                const circle = document.createElement('div');
+                circle.classList.add('bg-circle');
+                
+                const size = Math.random() * 150 + 100;
+                
+                circle.style.width = `${size}px`;
+                circle.style.height = `${size}px`;
+                circle.style.left = `${Math.random() * 100}%`;
+                circle.style.top = `${Math.random() * 100}%`;
+                circle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                circle.style.animationDelay = `${Math.random() * 5}s`;
+                circle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                
+                bgElements.appendChild(circle);
+            }
+        }
+        
+        // 密碼驗證邏輯
+        let attempts = 3;
+        const correctPassword = "G!ft0.m0_2025";
+        const successUrl = "https://gifto-mo.github.io/home.gifto.mo/";
+        const failUrl = "https://www.google.com";
+        
+        const passwordInput = document.getElementById('passwordInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        function checkPassword() {
+            const input = passwordInput.value.trim();
+            
+            if (input === correctPassword) {
+                // 成功動畫
+                submitBtn.innerHTML = '<i class="fas fa-check" style="margin-right: 10px;"></i> 驗證成功';
+                submitBtn.style.background = 'linear-gradient(135deg, #4CAF50, #66BB6A)';
+                
+                // 禁用輸入和按鈕
+                passwordInput.disabled = true;
+                submitBtn.disabled = true;
+                
+                // 跳轉
+                setTimeout(() => {
+                    window.location.href = successUrl;
+                }, 800);
+            } else {
+                attempts--;
+                
+                // 錯誤動畫
+                passwordInput.style.borderColor = 'var(--error)';
+                passwordInput.style.boxShadow = '0 0 0 2px rgba(255, 68, 68, 0.3)';
+                errorMessage.textContent = attempts > 0 ? 
+                    `密碼錯誤，剩餘 ${attempts} 次嘗試` : 
+                    '訪問被拒絕，將跳轉至首頁';
+                errorMessage.classList.add('show');
+                
+                // 清空輸入框
+                passwordInput.value = '';
+                
+                if (attempts <= 0) {
+                    // 禁用輸入和按鈕
+                    passwordInput.disabled = true;
+                    submitBtn.disabled = true;
+                    submitBtn.style.background = 'linear-gradient(135deg, #f44336, #e53935)';
+                    submitBtn.innerHTML = '<i class="fas fa-times" style="margin-right: 10px;"></i> 訪問被拒絕';
+                    
+                    // 跳轉
+                    setTimeout(() => {
+                        window.location.href = failUrl;
+                    }, 1500);
+                }
+            }
+        }
+        
+        // 事件監聽
+        submitBtn.addEventListener('click', checkPassword);
+        
+        passwordInput.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                checkPassword();
+            }
+        });
+        
+        passwordInput.addEventListener('focus', function() {
+            this.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            this.style.boxShadow = 'none';
+            errorMessage.classList.remove('show');
+        });
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createBackground();
+            passwordInput.focus();
+        });
+    </script>
+</body>
+</html>
